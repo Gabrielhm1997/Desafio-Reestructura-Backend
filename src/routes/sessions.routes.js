@@ -48,12 +48,22 @@ routerSessions.get('/logout', (req, res) => {//Logout
 })
 
 routerSessions.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => {
-    res.status(200).send({ mensaje: 'Usuario creado' })
+    req.session.user = req.user
+    // res.status(200).send({ status: true, mensaje: 'Usuario creado' })
+    if (req.session.user) {
+        res.status(200).redirect('/static/products')
+    } else {
+        res.status(200).render('login', {
+            script: "login",
+            title: "Login",
+            css: "login",
+        })
+    }
 })
 
-routerSessions.get('/githubSession', passport.authenticate('github'), async (req, res) => {
-    req.session.user = req.user
-    res.status(200).send({ mensaje: 'Session creada' })
-})
+// routerSessions.get('/githubSession', passport.authenticate('github'), async (req, res) => {
+//     req.session.user = req.user
+//     res.status(200).send({ status: true, mensaje: 'Session creada' })
+// })
 
 export default routerSessions

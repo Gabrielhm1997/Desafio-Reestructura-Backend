@@ -1,5 +1,7 @@
+import 'dotenv/config'
 import local from 'passport-local'
 import passport from 'passport'
+import GithubStrategy from 'passport-github2'
 import userModel from '../models/users.models.js'
 import { createHash, validatePassword } from '../utils/bcrypt.js'
 
@@ -49,37 +51,35 @@ const initializePassport = () => {
         }
     }))
 
-    // passport.use('github', new GithubStrategy({
-    //     clientID: process.env.CLIENT_ID,
-    //     clientSecret: process.env.CLIENT_SECRET,
-    //     callbackURL: process.env.CALLBACK_URL
+    passport.use('github', new GithubStrategy({
+        clientID: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        callbackURL: process.env.CALLBACK_URL
 
-    // }, async (accessToken, refreshToken, profile, done) => {
+    }, async (accessToken, refreshToken, profile, done) => {
 
-    //     try {
-    //         console.log(accessToken)
-    //         console.log(refreshToken)
-    //         console.log(process.env.CALLBACK_URL)
-    //         const user = await userModel.findOne({ email: profile._json.email })
-    //         if (!user) {
-    //             const userCreated = await userModel.create({
-    //                 first_name: profile._json.name,
-    //                 last_name: ' ',
-    //                 email: profile._json.email,
-    //                 age: 18, //Edad por defecto,
-    //                 password: 'password'
-    //             })
-    //             done(null, userCreated)
-
-    //         } else {
-    //             done(null, user)
-    //         }
-
-    //     } catch (error) {
-    //         done(error)
-    //     }
-
-    // }))
+        try {
+            // console.log(accessToken)
+            // console.log(refreshToken)
+            // console.log(process.env.CALLBACK_URL)
+            const user = await userModel.findOne({ email: profile._json.email })
+            
+            if (user) {
+                done(null, user)
+            } else {
+                const userCreated = await userModel.create({
+                    first_name: profile._json.name,
+                    last_name: 'Undefined',
+                    email: profile._json.email,
+                    age: 18, //Edad por defecto,
+                    password: createHash('password')
+                })
+                done(null, userCreated)
+            }
+        } catch (error) {
+            done(error)
+        }
+    }))
 
     //Inicializar la session del user
     passport.serializeUser((user, done) => {
