@@ -1,22 +1,28 @@
 import { Router } from "express"
 import passport from "passport"
+import { passportError, authorization } from '../utils/messageErrors.js'
+import { generateToken } from "../utils/jwt.js"
 
 const routerSessions = Router()
 
-routerSessions.get('/', async (req, res) => {
-    // console.log(req.session.user.email)
-    // console.log(req.session.user)
-    try {
-        if (req.session.user.email) {
-            res.status(200).send({ status: true, data: req.session.user})
-        } else {
-            res.status(404).send({ status: false, error: "Sesion no existente"})
-        }
-    } catch (error) {
-        res.status(404).send({ status: false, error: `Error: ${error}`})
-    }
-})
+// routerSessions.get('/', async (req, res) => {
+//     // console.log(req.session.user.email)
+//     // console.log(req.session.user)
+//     try {
+//         if (req.session.user.email) {
+//             res.status(200).send({ status: true, data: req.session.user })
+//         } else {
+//             res.status(404).send({ status: false, error: "Sesion no existente" })
+//         }
+//     } catch (error) {
+//         res.status(404).send({ status: false, error: `Error: ${error}` })
+//     }
+// })
  
+routerSessions.get('/current', passportError('jwt'), authorization('user'), async (req, res) => {
+    res.status(200).send({ status: true, data: req.user})
+})
+
 routerSessions.post('/login', passport.authenticate('login'), async (req, res) => {//Login
     // console.log(req.user)
     // console.log(req.session)
@@ -27,29 +33,32 @@ routerSessions.post('/login', passport.authenticate('login'), async (req, res) =
             req.session.user = {
                 first_name: req.user.first_name,
                 last_name: req.user.last_name,
-                age: req.user.age ?? "Undefined",
+                age: req.user.age,
                 email: req.user.email,
                 rol: req.user.rol
-                //_id: req.user._id
             }
-            res.status(200).send({ status: true, data: req.user })
+
+            const token = generateToken(req.user)
+            
+            res.cookie('jwtCookie', token, {
+                maxAge: 43200000
+            }) 
+            res.status(200).send({ status: true, data: token  })//req.user
         }
     } catch (error) {
-        console.log(error)
         res.status(500).send({ status: false, error: `Error al iniciar sesion ${error}` })
     }
 })
 
-routerSessions.get('/logout', (req, res) => {//Logout
-    if (req.session) {
-        req.session.destroy()
-    }
-    res.status(200).send({ status:true, data: 'Login eliminado' })
-})
-
-routerSessions.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => {
+routerSessions.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => { //Login GitHub
     req.session.user = req.user
-    // res.status(200).send({ status: true, mensaje: 'Usuario creado' })
+    
+    const token = generateToken(req.user)
+            
+    res.cookie('jwtCookie', token, {
+        maxAge: 43200000
+    }) 
+    
     if (req.session.user) {
         res.status(200).redirect('/static/products')
     } else {
@@ -61,9 +70,12 @@ routerSessions.get('/github', passport.authenticate('github', { scope: ['user:em
     }
 })
 
-// routerSessions.get('/githubSession', passport.authenticate('github'), async (req, res) => {
-//     req.session.user = req.user
-//     res.status(200).send({ status: true, mensaje: 'Session creada' })
-// })
+routerSessions.get('/logout', (req, res) => { //Logout
+    if (req.session) {
+        req.session.destroy()
+    }
+    res.clearCookie('jwtCookie')
+    res.status(200).send({ status: true, data: 'Login eliminado' })
+})
 
 export default routerSessions

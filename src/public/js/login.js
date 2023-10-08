@@ -1,4 +1,3 @@
-
 const githubButton = document.getElementById("github")
 const formLogin = document.getElementById("formLogin")
 const errorMessage = document.getElementById("message")

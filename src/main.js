@@ -3,15 +3,14 @@
 import 'dotenv/config'
 import express from 'express'
 import session from "express-session"
+import { engine } from 'express-handlebars'
 import cookieParser from "cookie-parser"
 import passport from "passport"
 import mongoose from 'mongoose'
 import MongoStore from "connect-mongo"
-import { engine } from 'express-handlebars'
 import { Server } from 'socket.io'
+import router from './routes/index.routes.js'
 import routerViews from './routes/views.routes.js'
-import routerSessions from "./routes/sessions.routes.js"
-import routerUsers from "./routes/users.routes.js"
 import initializePassport from "./config/passport.js"
 
 const PORT = 8080
@@ -19,7 +18,7 @@ export default PORT
 const app = express()
 
 // Conexion a Mongodb Atlas
-mongoose.connect(process.env.MONGODB_ATLAS_API_KEY) // Use Dotenv para resguardar la conexion a la db
+mongoose.connect(process.env.MONGODB_ATLAS_API_KEY)
     .then(() => console.log("DB connected"))
     .catch(error => console.log(error))
 
@@ -33,7 +32,7 @@ const io = new Server(server)
 //Middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser(process.env.SIGNED_COOKIE))
+app.use(cookieParser(process.env.JWT_SECRET))
 app.use(session({
     store: MongoStore.create({
         mongoUrl: process.env.MONGODB_ATLAS_API_KEY,
@@ -54,9 +53,8 @@ app.use(passport.session())
 //Routes
 app.use('/static', express.static('src/public')) // Rutas publicas
 app.use('/static', routerViews) // Ruta de vistas Handlebars
-app.use('/api/sessions', routerSessions) // Ruta de sesiones
-app.use('/api/users', routerUsers) // Ruta de usuarios
-
+app.use('/api', router) // Router de las rutas "API"
+ 
 app.get('*', (req, res) => {
     res.status(404).send("Error 404")
 })

@@ -7,7 +7,7 @@ const productsButton = document.getElementById("productsButton")
  
 productsButton.innerHTML = `<a href="http://localhost:8080/static/products"><button> Productos </button></a>`
  
-fetch(`http://localhost:8080/api/sessions`)
+fetch(`http://localhost:8080/api/sessions/current`)
     .then(res => res.json())
     .then(res => {
         console.log(res)
