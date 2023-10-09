@@ -4,22 +4,8 @@ import { passportError, authorization } from '../utils/messageErrors.js'
 import { generateToken } from "../utils/jwt.js"
 
 const routerSessions = Router()
-
-// routerSessions.get('/', async (req, res) => {
-//     // console.log(req.session.user.email)
-//     // console.log(req.session.user)
-//     try {
-//         if (req.session.user.email) {
-//             res.status(200).send({ status: true, data: req.session.user })
-//         } else {
-//             res.status(404).send({ status: false, error: "Sesion no existente" })
-//         }
-//     } catch (error) {
-//         res.status(404).send({ status: false, error: `Error: ${error}` })
-//     }
-// })
  
-routerSessions.get('/current', passportError('jwt'), authorization('user'), async (req, res) => {
+routerSessions.get('/current', passportError('jwt'), async (req, res) => {
     res.status(200).send({ status: true, data: req.user})
 })
 

@@ -1,3 +1,4 @@
+
 const productsButton = document.getElementById("productsButton")
 const logout = document.getElementById("logout")
 
