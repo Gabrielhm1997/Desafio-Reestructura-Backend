@@ -43,7 +43,7 @@ routerViews.get('/products', async (req, res) => {//Productos
 
 routerViews.get('/profile', async (req, res) => {//Perfil
     //console.log(req.session.user)
-    if (req.session.user) {
+    if (req.user) {
         res.status(200).render('profile', {
             script: "profile",
             title: "Profile",
