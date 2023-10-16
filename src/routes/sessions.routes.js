@@ -24,6 +24,16 @@ routerSessions.post('/login', passport.authenticate('login'), async (req, res) =
                 rol: req.user.rol
             }
 
+            const jwtUser = {
+                first_name: req.user.first_name,
+                last_name: req.user.last_name,
+                age: req.user.age,
+                email: req.user.email,
+                rol: req.user.rol
+            }
+
+            req.user = jwtUser
+
             const token = generateToken(req.user)
             
             res.cookie('jwtCookie', token, {
@@ -39,6 +49,16 @@ routerSessions.post('/login', passport.authenticate('login'), async (req, res) =
 routerSessions.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => { //Login GitHub
     req.session.user = req.user
     
+    const jwtUser = {
+        first_name: req.user.first_name,
+        last_name: req.user.last_name,
+        age: req.user.age,
+        email: req.user.email,
+        rol: req.user.rol
+    }
+
+    req.user = jwtUser
+
     const token = generateToken(req.user)
             
     res.cookie('jwtCookie', token, {

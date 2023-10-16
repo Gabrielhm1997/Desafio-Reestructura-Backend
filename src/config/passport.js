@@ -22,15 +22,16 @@ const initializePassport = () => {
         secretOrKey: process.env.JWT_SECRET
     }, async (jwt_payload, done) => {
         //console.log(jwt_payload)
+
         try {
             return done(null, jwt_payload.user)
         } catch (error) {
             return done(error, false)
         }
     }))
-
+     
     passport.use('register', new LocalStrategy({ passReqToCallback: true, usernameField: 'email' }, async (req, username, password, done) => {
-
+        
         const { first_name, last_name, email, age } = req.body
         try {
             const user = await userModel.findOne({ email: email })
