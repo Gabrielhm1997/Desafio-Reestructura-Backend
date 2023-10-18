@@ -23,6 +23,7 @@ routerUsers.post('/', passport.authenticate('register'), async (req, res) => {
         const token = generateToken(req.user)
 
         res.cookie('jwtCookie', token, {
+            httpOnly: true,
             maxAge: 43200000
         }) 
         res.status(200).send({ status: true, mensaje: 'Usuario creado' })

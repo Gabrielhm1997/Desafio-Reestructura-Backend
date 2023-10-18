@@ -37,6 +37,7 @@ routerSessions.post('/login', passport.authenticate('login'), async (req, res) =
             const token = generateToken(req.user)
             
             res.cookie('jwtCookie', token, {
+                httpOnly: true,
                 maxAge: 43200000
             }) 
             res.status(200).send({ status: true, data: token  })//req.user
@@ -62,6 +63,7 @@ routerSessions.get('/github', passport.authenticate('github', { scope: ['user:em
     const token = generateToken(req.user)
             
     res.cookie('jwtCookie', token, {
+        httpOnly: true,
         maxAge: 43200000
     }) 
     
