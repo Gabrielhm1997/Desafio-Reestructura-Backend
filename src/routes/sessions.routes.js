@@ -16,23 +16,13 @@ routerSessions.post('/login', passport.authenticate('login'), async (req, res) =
         if (!req.user) {
             res.status(401).send({ status: false, error: "Email o contraseña invalida" })
         } else {
-            req.session.user = {
-                first_name: req.user.first_name,
-                last_name: req.user.last_name,
-                age: req.user.age,
-                email: req.user.email,
-                rol: req.user.rol
-            }
-
-            const jwtUser = {
-                first_name: req.user.first_name,
-                last_name: req.user.last_name,
-                age: req.user.age,
-                email: req.user.email,
-                rol: req.user.rol
-            }
-
-            req.user = jwtUser
+            // req.session.user = {
+            //     first_name: req.user.first_name,
+            //     last_name: req.user.last_name,
+            //     age: req.user.age,
+            //     email: req.user.email,
+            //     rol: req.user.rol
+            // }
 
             const token = generateToken(req.user)
             
@@ -48,18 +38,7 @@ routerSessions.post('/login', passport.authenticate('login'), async (req, res) =
 })
 
 routerSessions.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => { //Login GitHub
-    req.session.user = req.user
-    
-    const jwtUser = {
-        first_name: req.user.first_name,
-        last_name: req.user.last_name,
-        age: req.user.age,
-        email: req.user.email,
-        rol: req.user.rol
-    }
-
-    req.user = jwtUser
-
+    // req.session.user = req.user
     const token = generateToken(req.user)
             
     res.cookie('jwtCookie', token, {
@@ -67,7 +46,7 @@ routerSessions.get('/github', passport.authenticate('github', { scope: ['user:em
         maxAge: 43200000
     }) 
     
-    if (req.session.user) {
+    if (req.user) {//req.session.user
         res.status(200).redirect('/static/products')
     } else {
         res.status(200).render('login', {

@@ -12,6 +12,19 @@ const ExtractJWT = jwt.ExtractJwt
 
 const initializePassport = () => {
 
+    const safeUser = (user) => {
+
+        const safeUser = {
+            id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            age: user.age,
+            email: user.email,
+            rol: user.rol
+        }
+        return safeUser
+    }
+
     const cookieExtractor = req => {
         const token = req.cookies ? req.cookies.jwtCookie : {}
         return token
@@ -29,9 +42,9 @@ const initializePassport = () => {
             return done(error, false)
         }
     }))
-     
+
     passport.use('register', new LocalStrategy({ passReqToCallback: true, usernameField: 'email' }, async (req, username, password, done) => {
-        
+
         const { first_name, last_name, email, age } = req.body
         try {
             const user = await userModel.findOne({ email: email })
@@ -47,7 +60,7 @@ const initializePassport = () => {
                     age: age,
                     password: passwordHash
                 })
-                return done(null, newUser)
+                return done(null, safeUser(newUser))
             }
         } catch (error) {
             return done(error, false)
@@ -58,11 +71,11 @@ const initializePassport = () => {
 
         try {
             const user = await userModel.findOne({ email: username })
-
+            
             if (!user) {
                 return done(null, false)
             } else if (validatePassword(password, user.password)) {
-                return done(null, user) //Usuario y contraseña validos
+                return done(null, safeUser(user)) //Usuario y contraseña validos
             } else {
                 return done(null, false) //Contraseña no valida
             }
@@ -84,9 +97,9 @@ const initializePassport = () => {
             // console.log(refreshToken)
             // console.log(process.env.CALLBACK_URL)
             const user = await userModel.findOne({ email: profile._json.email })
-            
+
             if (user) {
-                done(null, user)
+                done(null, safeUser(user))
             } else {
                 const userCreated = await userModel.create({
                     first_name: profile._json.name,
@@ -104,7 +117,7 @@ const initializePassport = () => {
 
     //Inicializar la session del user
     passport.serializeUser((user, done) => {
-        done(null, user._id)
+        done(null, user.id)
     })
 
     //Eliminar la session del user
